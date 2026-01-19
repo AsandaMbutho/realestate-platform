@@ -1,10 +1,10 @@
-import { auth } from "@/auth";
+// middleware.ts - This allows ALL access
 import { NextResponse } from "next/server";
 
-export default auth((req) => {
-  return NextResponse.next();
-});
+export default function middleware() {
+  return NextResponse.next(); // Allow everything
+}
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

@@ -1,3 +1,11 @@
+# Real Estate Platform
+
+## 🏠 Status
+
+- Frontend with 4 dashboards ✓ READY
+- Mock data working locally ✓ READY
+- Ready for backend connection
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

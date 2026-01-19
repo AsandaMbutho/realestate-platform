@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
 import {
   Users,
   Home,
@@ -32,11 +31,17 @@ import {
   Plus,
   Map,
   Briefcase,
+  FileText,
+  Search,
+  Filter,
+  User,
+  Mail,
+  ChevronDown,
+  Star,
 } from "lucide-react";
 
 export default function RealEstateDashboard() {
   const router = useRouter();
-  const { data: session, status } = useSession();
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<"manager" | "agent">("manager");
   const [activeTab, setActiveTab] = useState("overview");
@@ -147,11 +152,11 @@ export default function RealEstateDashboard() {
             Switch View (Demo Only)
           </button>
           <button
-            onClick={() => signOut()}
+            onClick={() => alert("Demo Mode - Exit disabled for presentation")}
             className="flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors"
           >
             <LogOut size={20} />
-            <span className="font-medium">Sign Out</span>
+            <span className="font-medium">Exit Dashboard</span>
           </button>
         </div>
       </aside>
@@ -191,7 +196,11 @@ export default function RealEstateDashboard() {
         </header>
 
         <div className="p-8 max-w-[1400px] mx-auto">
-          {role === "manager" ? <ManagerView /> : <AgentView />}
+          {role === "manager" ? (
+            <ManagerView activeTab={activeTab} />
+          ) : (
+            <AgentView activeTab={activeTab} />
+          )}
         </div>
       </main>
     </div>
@@ -200,386 +209,803 @@ export default function RealEstateDashboard() {
 
 // --- Manager View Component ---
 
-function ManagerView() {
-  return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-end">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-            Manager CRM Dashboard
-          </h1>
-          <p className="text-slate-500 font-medium">
-            Real-time tracking & analytics
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 border rounded-xl font-bold text-sm text-slate-600 hover:bg-gray-50">
-            <Download size={18} /> Export
-          </button>
-          <button className="flex items-center gap-2 px-6 py-2 bg-[#1F4EA0] text-white rounded-xl font-bold text-sm shadow-md shadow-blue-100 hover:bg-blue-800">
-            <Send size={18} /> Broadcast
-          </button>
-        </div>
-      </div>
+function ManagerView({ activeTab }: { activeTab: string }) {
+  const [agents] = useState([
+    {
+      id: 1,
+      name: "John Agent",
+      status: "active",
+      performance: 94,
+      deals: 12,
+      revenue: "R 2.4M",
+    },
+    {
+      id: 2,
+      name: "Sarah Smith",
+      status: "active",
+      performance: 87,
+      deals: 9,
+      revenue: "R 1.8M",
+    },
+    {
+      id: 3,
+      name: "Mike Brown",
+      status: "inactive",
+      performance: 76,
+      deals: 7,
+      revenue: "R 1.5M",
+    },
+    {
+      id: 4,
+      name: "Emma Wilson",
+      status: "inactive",
+      performance: 65,
+      deals: 5,
+      revenue: "R 1.2M",
+    },
+  ]);
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Active Agents"
-          value="24"
-          trend="+2 today"
-          icon={<Users className="text-blue-500" />}
-        />
-        <StatCard
-          title="Client Visits"
-          value="174"
-          trend="Live updating"
-          icon={<Eye className="text-green-500" />}
-          trendColor="text-green-600"
-        />
-        <StatCard
-          title="Pending Deals"
-          value="18"
-          trend="Requires attention"
-          icon={<Home className="text-purple-500" />}
-          trendColor="text-amber-500"
-        />
-        <StatCard
-          title="Weekly Sales"
-          value="R 4 306 192"
-          trend="+12% from last week"
-          icon={<span className="text-green-500 font-bold">R</span>}
-          trendColor="text-green-600"
-        />
-      </div>
+  const [properties] = useState([
+    {
+      id: 1,
+      name: "Luxury Apartment",
+      location: "Sandton",
+      price: "R 2,500,000",
+      status: "Active",
+      views: 156,
+    },
+    {
+      id: 2,
+      name: "Modern Penthouse",
+      location: "Sandton City",
+      price: "R 4,200,000",
+      status: "Under Offer",
+      views: 89,
+    },
+    {
+      id: 3,
+      name: "Executive Villa",
+      location: "Morningside",
+      price: "R 18,500,000",
+      status: "Active",
+      views: 203,
+    },
+  ]);
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          <section className="bg-white rounded-[2rem] border shadow-sm p-8">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-extrabold text-xl text-slate-800">
-                Agent Tracking & Performance
-              </h3>
-              <MapPin size={20} className="text-gray-300" />
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "overview":
+        return (
+          <div className="space-y-8">
+            <div className="flex justify-between items-end">
+              <div>
+                <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                  Manager CRM Dashboard
+                </h1>
+                <p className="text-slate-500 font-medium">
+                  Real-time tracking & analytics
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button className="flex items-center gap-2 px-4 py-2 border rounded-xl font-bold text-sm text-slate-600 hover:bg-gray-50">
+                  <Download size={18} /> Export
+                </button>
+                <button className="flex items-center gap-2 px-6 py-2 bg-[#1F4EA0] text-white rounded-xl font-bold text-sm shadow-md shadow-blue-100 hover:bg-blue-800">
+                  <Send size={18} /> Broadcast
+                </button>
+              </div>
             </div>
-            <div className="space-y-4">
-              <AgentRow
-                name="John Agent"
-                location="Sandton CBD"
-                performance={94}
-                time="5 min ago"
-                status="active"
-              />
-              <AgentRow
-                name="Sarah Smith"
-                location="Morningside"
-                performance={87}
-                time="15 min ago"
-                status="active"
-                color="bg-blue-400"
-              />
-              <AgentRow
-                name="Mike Brown"
-                location="Bryanston"
-                performance={76}
-                time="30 min ago"
-                status="inactive"
-                color="bg-gray-400"
-              />
-              <AgentRow
-                name="Emma Wilson"
-                location="Sandton City"
-                performance={65}
-                time="2 hours ago"
-                status="inactive"
-                color="bg-gray-400"
-              />
-            </div>
-          </section>
 
-          <section className="bg-white rounded-[2rem] border shadow-sm p-8 leading-relaxed">
-            <h3 className="font-extrabold text-xl text-slate-800 mb-8">
-              Performance Metrics
-            </h3>
-            <div className="grid grid-cols-2 gap-x-12 gap-y-10">
-              <MetricBar
-                label="Conversion Rate"
-                value="28%"
-                color="bg-green-500"
-                width="28%"
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <StatCard
+                title="Active Agents"
+                value="24"
+                trend="+2 today"
+                icon={<Users className="text-blue-500" />}
               />
-              <MetricBar
-                label="Avg Response Time"
-                value="12 min"
-                color="bg-blue-500"
-                width="60%"
+              <StatCard
+                title="Client Visits"
+                value="174"
+                trend="Live updating"
+                icon={<Eye className="text-green-500" />}
+                trendColor="text-green-600"
               />
-              <MetricBar
-                label="Deal Closure Rate"
-                value="42%"
-                color="bg-purple-500"
-                width="42%"
+              <StatCard
+                title="Pending Deals"
+                value="18"
+                trend="Requires attention"
+                icon={<Home className="text-purple-500" />}
+                trendColor="text-amber-500"
               />
-              <MetricBar
-                label="Client Satisfaction"
-                value="4.6/5"
-                color="bg-orange-500"
-                width="92%"
+              <StatCard
+                title="Weekly Sales"
+                value="R 4 306 192"
+                trend="+12% from last week"
+                icon={<span className="text-green-500 font-bold">R</span>}
+                trendColor="text-green-600"
               />
             </div>
-          </section>
-        </div>
 
-        <div className="space-y-8">
-          <section className="bg-white rounded-[2rem] border shadow-sm p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-extrabold text-lg text-slate-800">
-                Client Picks of the Week
-              </h3>
-              <TrendingUp size={20} className="text-gray-300" />
-            </div>
-            <div className="space-y-4">
-              <PropertyPick
-                title="Luxury Apartment"
-                count={28}
-                views={245}
-                saved={45}
-              />
-              <PropertyPick
-                title="Modern Penthouse"
-                count={18}
-                views={189}
-                saved={32}
-              />
-            </div>
-          </section>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-8">
+                <section className="bg-white rounded-[2rem] border shadow-sm p-8">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="font-extrabold text-xl text-slate-800">
+                      Agent Tracking & Performance
+                    </h3>
+                    <MapPin size={20} className="text-gray-300" />
+                  </div>
+                  <div className="space-y-4">
+                    <AgentRow
+                      name="John Agent"
+                      location="Sandton CBD"
+                      performance={94}
+                      time="5 min ago"
+                      status="active"
+                    />
+                    <AgentRow
+                      name="Sarah Smith"
+                      location="Morningside"
+                      performance={87}
+                      time="15 min ago"
+                      status="active"
+                      color="bg-blue-400"
+                    />
+                    <AgentRow
+                      name="Mike Brown"
+                      location="Bryanston"
+                      performance={76}
+                      time="30 min ago"
+                      status="inactive"
+                      color="bg-gray-400"
+                    />
+                    <AgentRow
+                      name="Emma Wilson"
+                      location="Sandton City"
+                      performance={65}
+                      time="2 hours ago"
+                      status="inactive"
+                      color="bg-gray-400"
+                    />
+                  </div>
+                </section>
 
-          <section className="bg-white rounded-[2rem] border shadow-sm p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-extrabold text-lg text-slate-800">
-                System Alerts
-              </h3>
-              <AlertTriangle size={20} className="text-amber-400" />
+                <section className="bg-white rounded-[2rem] border shadow-sm p-8 leading-relaxed">
+                  <h3 className="font-extrabold text-xl text-slate-800 mb-8">
+                    Performance Metrics
+                  </h3>
+                  <div className="grid grid-cols-2 gap-x-12 gap-y-10">
+                    <MetricBar
+                      label="Conversion Rate"
+                      value="28%"
+                      color="bg-green-500"
+                      width="28%"
+                    />
+                    <MetricBar
+                      label="Avg Response Time"
+                      value="12 min"
+                      color="bg-blue-500"
+                      width="60%"
+                    />
+                    <MetricBar
+                      label="Deal Closure Rate"
+                      value="42%"
+                      color="bg-purple-500"
+                      width="42%"
+                    />
+                    <MetricBar
+                      label="Client Satisfaction"
+                      value="4.6/5"
+                      color="bg-orange-500"
+                      width="92%"
+                    />
+                  </div>
+                </section>
+              </div>
+
+              <div className="space-y-8">
+                <section className="bg-white rounded-[2rem] border shadow-sm p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="font-extrabold text-lg text-slate-800">
+                      Client Picks of the Week
+                    </h3>
+                    <TrendingUp size={20} className="text-gray-300" />
+                  </div>
+                  <div className="space-y-4">
+                    <PropertyPick
+                      title="Luxury Apartment"
+                      count={28}
+                      views={245}
+                      saved={45}
+                    />
+                    <PropertyPick
+                      title="Modern Penthouse"
+                      count={18}
+                      views={189}
+                      saved={32}
+                    />
+                  </div>
+                </section>
+
+                <section className="bg-white rounded-[2rem] border shadow-sm p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="font-extrabold text-lg text-slate-800">
+                      System Alerts
+                    </h3>
+                    <AlertTriangle size={20} className="text-amber-400" />
+                  </div>
+                  <div className="space-y-3">
+                    <AlertBox
+                      type="warning"
+                      message="Missed 2 client appointments"
+                      agent="Mike Brown"
+                      time="2 hours ago"
+                    />
+                    <AlertBox
+                      type="info"
+                      message="Sales target exceeded for January"
+                      time="1 day ago"
+                    />
+                  </div>
+                </section>
+              </div>
             </div>
-            <div className="space-y-3">
-              <AlertBox
-                type="warning"
-                message="Missed 2 client appointments"
-                agent="Mike Brown"
-                time="2 hours ago"
-              />
-              <AlertBox
-                type="info"
-                message="Sales target exceeded for January"
-                time="1 day ago"
-              />
+          </div>
+        );
+
+      case "agents":
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                  Agent Management
+                </h1>
+                <p className="text-slate-500 font-medium">
+                  Manage and monitor your agent team
+                </p>
+              </div>
+              <button className="px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors flex items-center gap-2">
+                <Plus size={16} /> Add Agent
+              </button>
             </div>
-          </section>
-        </div>
-      </div>
-    </div>
-  );
+
+            <div className="bg-white rounded-[2rem] border shadow-sm overflow-hidden">
+              <div className="p-8 border-b flex justify-between items-center">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800">
+                    All Agents
+                  </h2>
+                  <p className="text-sm text-slate-500">
+                    {agents.length} agents in your team
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  <button className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-2">
+                    <Filter size={16} /> Filter
+                  </button>
+                  <div className="relative">
+                    <Search
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+                      size={16}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Search agents..."
+                      className="pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-300"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="divide-y">
+                {agents.map((agent) => (
+                  <div
+                    key={agent.id}
+                    className="p-6 hover:bg-slate-50/50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div
+                          className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${
+                            agent.status === "active"
+                              ? "bg-green-500"
+                              : "bg-gray-400"
+                          }`}
+                        >
+                          {agent.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-slate-900">
+                            {agent.name}
+                          </h3>
+                          <p className="text-sm text-slate-500 flex items-center gap-1">
+                            <span
+                              className={`w-2 h-2 rounded-full ${
+                                agent.status === "active"
+                                  ? "bg-green-500"
+                                  : "bg-gray-400"
+                              }`}
+                            ></span>
+                            {agent.status === "active" ? "Active" : "Inactive"}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-8">
+                        <div className="text-center">
+                          <p className="text-sm text-slate-500">Performance</p>
+                          <p className="text-xl font-bold text-slate-900">
+                            {agent.performance}%
+                          </p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm text-slate-500">Deals Closed</p>
+                          <p className="text-xl font-bold text-slate-900">
+                            {agent.deals}
+                          </p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm text-slate-500">Revenue</p>
+                          <p className="text-xl font-bold text-slate-900">
+                            {agent.revenue}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button className="p-2 border border-blue-100 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                            <MessageSquare size={16} />
+                          </button>
+                          <button className="px-3 py-1 border border-slate-200 text-slate-600 rounded-lg text-xs font-medium hover:bg-slate-50">
+                            View Details
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+
+      case "props":
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                  All Properties
+                </h1>
+                <p className="text-slate-500 font-medium">
+                  Manage all company properties
+                </p>
+              </div>
+              <button className="px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors flex items-center gap-2">
+                <Plus size={16} /> Add Property
+              </button>
+            </div>
+
+            <div className="bg-white rounded-[2rem] border shadow-sm overflow-hidden">
+              <div className="p-8 border-b flex justify-between items-center">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800">
+                    Property Listings
+                  </h2>
+                  <p className="text-sm text-slate-500">
+                    {properties.length} active listings
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  <button className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-2">
+                    <Filter size={16} /> Filter
+                  </button>
+                </div>
+              </div>
+
+              <div className="divide-y">
+                {properties.map((property) => (
+                  <div
+                    key={property.id}
+                    className="p-6 hover:bg-slate-50/50 transition-colors"
+                  >
+                    <div className="flex gap-4">
+                      <div className="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100"></div>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h3 className="font-bold text-slate-900">
+                              {property.name}
+                            </h3>
+                            <p className="text-sm text-slate-500 flex items-center gap-1">
+                              <MapPin size={14} /> {property.location}
+                            </p>
+                          </div>
+                          <span className="text-lg font-black text-blue-700">
+                            {property.price}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <div className="flex gap-4">
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-bold ${
+                                property.status === "Active"
+                                  ? "bg-emerald-100 text-emerald-700"
+                                  : "bg-amber-100 text-amber-700"
+                              }`}
+                            >
+                              {property.status}
+                            </span>
+                            <div className="flex items-center gap-1 text-slate-500">
+                              <Eye size={14} /> {property.views} views
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <button className="px-3 py-1 border border-slate-200 text-slate-600 rounded-lg text-xs font-medium hover:bg-slate-50">
+                              Edit
+                            </button>
+                            <button className="px-3 py-1 border border-blue-100 text-blue-600 bg-blue-50 rounded-lg text-xs font-medium hover:bg-blue-100">
+                              View Details
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+
+      case "reports":
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                  Reports & Analytics
+                </h1>
+                <p className="text-slate-500 font-medium">
+                  Generate and download reports
+                </p>
+              </div>
+              <button className="px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors flex items-center gap-2">
+                <Download size={16} /> Generate Report
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[
+                {
+                  id: 1,
+                  name: "Monthly Sales Report",
+                  date: "Feb 2024",
+                  size: "2.4 MB",
+                },
+                {
+                  id: 2,
+                  name: "Agent Performance Analysis",
+                  date: "Jan 2024",
+                  size: "1.8 MB",
+                },
+                {
+                  id: 3,
+                  name: "Property Market Trends",
+                  date: "Dec 2023",
+                  size: "3.2 MB",
+                },
+                {
+                  id: 4,
+                  name: "Quarterly Revenue Report",
+                  date: "Nov 2023",
+                  size: "1.5 MB",
+                },
+              ].map((report) => (
+                <div
+                  key={report.id}
+                  className="bg-white rounded-[2rem] border p-6 hover:border-blue-200 transition-all"
+                >
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="p-3 bg-slate-100 rounded-2xl">
+                      <FileText className="text-slate-600" size={20} />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-slate-900">
+                        {report.name}
+                      </h3>
+                      <p className="text-sm text-slate-500">
+                        {report.date} • {report.size}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <button className="flex-1 py-2 bg-slate-100 text-slate-700 rounded-xl font-medium hover:bg-slate-200 transition-colors">
+                      Preview
+                    </button>
+                    <button className="flex-1 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors">
+                      Download
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      default:
+        return (
+          <div className="space-y-8">
+            <div className="flex justify-between items-end">
+              <div>
+                <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                  Manager CRM Dashboard
+                </h1>
+                <p className="text-slate-500 font-medium">
+                  Real-time tracking & analytics
+                </p>
+              </div>
+            </div>
+            <div className="bg-white rounded-[2rem] border shadow-sm p-8">
+              <h2 className="text-xl font-bold text-slate-800 mb-4">
+                {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}{" "}
+                Dashboard
+              </h2>
+              <p className="text-slate-500">
+                Content for {activeTab} is coming soon...
+              </p>
+            </div>
+          </div>
+        );
+    }
+  };
+
+  return renderTabContent();
 }
 
 // --- Agent View Component ---
 
-function AgentView() {
-  return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-end">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-            Agent Dashboard
-          </h1>
-          <p className="text-slate-500 font-medium">
-            Real-time tracking & client management
-          </p>
-        </div>
-        <div className="flex gap-4 items-center">
-          <div className="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-xl border border-green-200 font-bold text-sm">
-            <CheckCircle2 size={18} /> Checked In
+function AgentView({ activeTab }: { activeTab: string }) {
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "overview":
+        return (
+          <div className="space-y-8">
+            <div className="flex justify-between items-end">
+              <div>
+                <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                  Agent Dashboard
+                </h1>
+                <p className="text-slate-500 font-medium">
+                  Real-time tracking & client management
+                </p>
+              </div>
+              <div className="flex gap-4 items-center">
+                <div className="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-xl border border-green-200 font-bold text-sm">
+                  <CheckCircle2 size={18} /> Checked In
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <StatCard
+                title="Total Commission"
+                value="R 452 300"
+                trend="+12% this month"
+                icon={<span className="text-green-500 font-bold">R</span>}
+                trendColor="text-green-600"
+              />
+              <StatCard
+                title="Target Progress"
+                value="21%"
+                trend="R 125 000 of R 600 000"
+                icon={<Target className="text-blue-500" />}
+                trendColor="text-blue-600"
+              />
+              <StatCard
+                title="Deals Closed"
+                value="18"
+                trend="Rank: Top 10%"
+                icon={<Award className="text-purple-500" />}
+                trendColor="text-purple-600"
+              />
+              <StatCard
+                title="Current Location"
+                value="Sandton CBD"
+                trend="Johannesburg"
+                icon={<MapPin className="text-orange-500" />}
+                trendColor="text-orange-600"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-8">
+                <section className="bg-white rounded-[2rem] border shadow-sm overflow-hidden">
+                  <div className="p-8 border-b">
+                    <h3 className="font-extrabold text-xl text-slate-800 font-bold">
+                      My Properties
+                    </h3>
+                  </div>
+                  <table className="w-full">
+                    <thead>
+                      <tr className="text-left text-xs text-gray-400 uppercase tracking-widest border-b">
+                        <th className="px-8 py-4 font-bold">Property</th>
+                        <th className="px-8 py-4 font-bold">Location</th>
+                        <th className="px-8 py-4 font-bold">Price</th>
+                        <th className="px-8 py-4 font-bold">Status</th>
+                        <th className="px-8 py-4 font-bold text-center">
+                          Views
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y text-sm">
+                      <PropertyRow
+                        name="Luxury Apartment"
+                        loc="Sandton"
+                        price="R 2 500 000"
+                        status="Active"
+                        views={156}
+                      />
+                      <PropertyRow
+                        name="Modern Penthouse"
+                        loc="Sandton City"
+                        price="R 4 200 000"
+                        status="Under Offer"
+                        views={89}
+                      />
+                      <PropertyRow
+                        name="Executive Villa"
+                        loc="Morningside"
+                        price="R 18 500 000"
+                        status="Active"
+                        views={203}
+                      />
+                    </tbody>
+                  </table>
+                </section>
+
+                <section className="bg-white rounded-[2rem] border shadow-sm p-8">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="font-extrabold text-xl text-slate-800">
+                      Today's Schedule
+                    </h3>
+                    <Calendar size={20} className="text-gray-300" />
+                  </div>
+                  <div className="space-y-4">
+                    <ScheduleItem
+                      title="Property Viewing"
+                      client="John Doe"
+                      loc="Sandton Apartment"
+                      time="10:00 AM"
+                    />
+                    <ScheduleItem
+                      title="Contract Signing"
+                      client="Jane Smith"
+                      loc="Morningside Villa"
+                      time="2:00 PM"
+                    />
+                    <ScheduleItem
+                      title="Initial Consultation"
+                      client="Mike Johnson"
+                      loc="Virtual Meeting"
+                      time="4:30 PM"
+                    />
+                  </div>
+                </section>
+              </div>
+
+              <div className="space-y-8">
+                <section className="bg-white rounded-[2rem] border shadow-sm p-8">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="font-extrabold text-lg text-slate-800 underline decoration-red-200 underline-offset-8">
+                      Client Messages
+                    </h3>
+                    <span className="bg-red-50 text-red-600 px-2 py-0.5 rounded text-[10px] font-bold">
+                      1 unread
+                    </span>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                      <div className="flex justify-between items-center mb-1">
+                        <p className="font-bold text-slate-800 text-sm">
+                          Mike Johnson
+                        </p>
+                        <span className="text-[10px] text-gray-400">
+                          9:30 AM
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600 mb-3">
+                        When can we view the Sandton apartment?
+                      </p>
+                      <div className="flex gap-4 text-[10px] font-bold">
+                        <button className="text-blue-600">Reply</button>
+                        <button className="text-slate-400">
+                          View Property
+                        </button>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-white rounded-2xl border border-gray-100">
+                      <div className="flex justify-between items-center mb-1">
+                        <p className="font-bold text-slate-800 text-sm">
+                          Sarah Wilson
+                        </p>
+                        <span className="text-[10px] text-gray-400">
+                          Yesterday
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600">
+                        I've signed the documents, please check
+                      </p>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="bg-[#FFFBF5] rounded-[2rem] border border-amber-100 p-6 flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white rounded-2xl border border-amber-50 flex items-center justify-center text-amber-500 shadow-sm">
+                    <Award size={24} />
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-800 text-sm">
+                      Monthly Bonus
+                    </p>
+                    <p className="text-xs text-slate-500 font-medium">
+                      On track for R 15 000 bonus
+                    </p>
+                  </div>
+                </section>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <QuickAction
+                    icon={<BarChart className="text-blue-500" />}
+                    label="Commission Report"
+                  />
+                  <QuickAction
+                    icon={<Calendar className="text-green-500" />}
+                    label="Schedule"
+                  />
+                  <QuickAction
+                    icon={<MessageSquare className="text-purple-500" />}
+                    label="New Message"
+                  />
+                  <QuickAction
+                    icon={<MapPin className="text-orange-500" />}
+                    label="Update Location"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        );
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Commission"
-          value="R 452 300"
-          trend="+12% this month"
-          icon={<span className="text-green-500 font-bold">R</span>}
-          trendColor="text-green-600"
-        />
-        <StatCard
-          title="Target Progress"
-          value="21%"
-          trend="R 125 000 of R 600 000"
-          icon={<Target className="text-blue-500" />}
-          trendColor="text-blue-600"
-        />
-        <StatCard
-          title="Deals Closed"
-          value="18"
-          trend="Rank: Top 10%"
-          icon={<Award className="text-purple-500" />}
-          trendColor="text-purple-600"
-        />
-        <StatCard
-          title="Current Location"
-          value="Sandton CBD"
-          trend="Johannesburg"
-          icon={<MapPin className="text-orange-500" />}
-          trendColor="text-orange-600"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          <section className="bg-white rounded-[2rem] border shadow-sm overflow-hidden">
-            <div className="p-8 border-b">
-              <h3 className="font-extrabold text-xl text-slate-800 font-bold">
-                My Properties
-              </h3>
-            </div>
-            <table className="w-full">
-              <thead>
-                <tr className="text-left text-xs text-gray-400 uppercase tracking-widest border-b">
-                  <th className="px-8 py-4 font-bold">Property</th>
-                  <th className="px-8 py-4 font-bold">Location</th>
-                  <th className="px-8 py-4 font-bold">Price</th>
-                  <th className="px-8 py-4 font-bold">Status</th>
-                  <th className="px-8 py-4 font-bold text-center">Views</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y text-sm">
-                <PropertyRow
-                  name="Luxury Apartment"
-                  loc="Sandton"
-                  price="R 2 500 000"
-                  status="Active"
-                  views={156}
-                />
-                <PropertyRow
-                  name="Modern Penthouse"
-                  loc="Sandton City"
-                  price="R 4 200 000"
-                  status="Under Offer"
-                  views={89}
-                />
-                <PropertyRow
-                  name="Executive Villa"
-                  loc="Morningside"
-                  price="R 18 500 000"
-                  status="Active"
-                  views={203}
-                />
-              </tbody>
-            </table>
-          </section>
-
-          <section className="bg-white rounded-[2rem] border shadow-sm p-8">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-extrabold text-xl text-slate-800">
-                Today's Schedule
-              </h3>
-              <Calendar size={20} className="text-gray-300" />
-            </div>
-            <div className="space-y-4">
-              <ScheduleItem
-                title="Property Viewing"
-                client="John Doe"
-                loc="Sandton Apartment"
-                time="10:00 AM"
-              />
-              <ScheduleItem
-                title="Contract Signing"
-                client="Jane Smith"
-                loc="Morningside Villa"
-                time="2:00 PM"
-              />
-              <ScheduleItem
-                title="Initial Consultation"
-                client="Mike Johnson"
-                loc="Virtual Meeting"
-                time="4:30 PM"
-              />
-            </div>
-          </section>
-        </div>
-
-        <div className="space-y-8">
-          <section className="bg-white rounded-[2rem] border shadow-sm p-8">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-extrabold text-lg text-slate-800 underline decoration-red-200 underline-offset-8">
-                Client Messages
-              </h3>
-              <span className="bg-red-50 text-red-600 px-2 py-0.5 rounded text-[10px] font-bold">
-                1 unread
-              </span>
-            </div>
-            <div className="space-y-4">
-              <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100">
-                <div className="flex justify-between items-center mb-1">
-                  <p className="font-bold text-slate-800 text-sm">
-                    Mike Johnson
-                  </p>
-                  <span className="text-[10px] text-gray-400">9:30 AM</span>
-                </div>
-                <p className="text-xs text-slate-600 mb-3">
-                  When can we view the Sandton apartment?
-                </p>
-                <div className="flex gap-4 text-[10px] font-bold">
-                  <button className="text-blue-600">Reply</button>
-                  <button className="text-slate-400">View Property</button>
-                </div>
-              </div>
-              <div className="p-4 bg-white rounded-2xl border border-gray-100">
-                <div className="flex justify-between items-center mb-1">
-                  <p className="font-bold text-slate-800 text-sm">
-                    Sarah Wilson
-                  </p>
-                  <span className="text-[10px] text-gray-400">Yesterday</span>
-                </div>
-                <p className="text-xs text-slate-600">
-                  I've signed the documents, please check
+      default:
+        return (
+          <div className="space-y-8">
+            <div className="flex justify-between items-end">
+              <div>
+                <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                  Agent Dashboard
+                </h1>
+                <p className="text-slate-500 font-medium">
+                  Manage your {activeTab} here
                 </p>
               </div>
             </div>
-          </section>
-
-          <section className="bg-[#FFFBF5] rounded-[2rem] border border-amber-100 p-6 flex items-center gap-4">
-            <div className="w-12 h-12 bg-white rounded-2xl border border-amber-50 flex items-center justify-center text-amber-500 shadow-sm">
-              <Award size={24} />
-            </div>
-            <div>
-              <p className="font-bold text-slate-800 text-sm">Monthly Bonus</p>
-              <p className="text-xs text-slate-500 font-medium">
-                On track for R 15 000 bonus
+            <div className="bg-white rounded-[2rem] border shadow-sm p-8">
+              <h2 className="text-xl font-bold text-slate-800 mb-4">
+                {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}{" "}
+                Management
+              </h2>
+              <p className="text-slate-500">
+                Content for {activeTab} is coming soon...
               </p>
             </div>
-          </section>
-
-          <div className="grid grid-cols-2 gap-3">
-            <QuickAction
-              icon={<BarChart className="text-blue-500" />}
-              label="Commission Report"
-            />
-            <QuickAction
-              icon={<Calendar className="text-green-500" />}
-              label="Schedule"
-            />
-            <QuickAction
-              icon={<MessageSquare className="text-purple-500" />}
-              label="New Message"
-            />
-            <QuickAction
-              icon={<MapPin className="text-orange-500" />}
-              label="Update Location"
-            />
           </div>
-        </div>
-      </div>
-    </div>
-  );
+        );
+    }
+  };
+
+  return renderTabContent();
 }
 
 // --- Subcomponents ---
