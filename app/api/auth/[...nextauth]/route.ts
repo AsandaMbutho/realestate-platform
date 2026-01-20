@@ -1,7 +1,7 @@
 // app/api/auth/[...nextauth]/route.ts
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import authConfig from "../../../auth.config"; // FIXED PATH!
+import { authConfig } from "../../../../auth.config";
 
 export const {
   handlers: { GET, POST },
@@ -20,11 +20,14 @@ export const {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        return {
+        // Return proper User object
+        const user = {
           id: "1",
-          email: credentials.email,
+          email: String(credentials.email), // Convert to string
+          name: "Admin User",
           role: "admin",
         };
+        return user;
       },
     }),
   ],
