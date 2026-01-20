@@ -1,37 +1,71 @@
 import { NextResponse } from "next/server";
+import { connectDB } from "@/lib/mongodb";
+import User from "@/models/User";
 
-// Mock users for demo/pitch
-let mockUsers = [
-  { id: 1, name: "Alice Admin", email: "alice@demo.com", role: "ADMIN" },
-  { id: 2, name: "Bob Agent", email: "bob@demo.com", role: "AGENT" },
-  { id: 3, name: "Cara Client", email: "cara@demo.com", role: "CLIENT" },
-  { id: 4, name: "Mark Manager", email: "mark@demo.com", role: "MANAGER" },
-];
-
-// GET: return all users
+// GET: return all users from MongoDB
 export async function GET() {
-  return NextResponse.json(mockUsers);
-}
+  try {
+    console.log("GET /api/users called");
+    await connectDB();
 
-// POST: add a new user (mock only, not persisted)
-export async function POST(req: Request) {
-  const { name, email, role } = await req.json();
-
-  if (!name || !email || !role) {
+    const users = await User.find().select("-password");
+    return NextResponse.json(users);
+  } catch (error) {
+    console.error("GET /api/users error:", error);
     return NextResponse.json(
-      { error: "Missing required fields" },
-      { status: 400 }
+      { error: "Failed to fetch users" },
+      { status: 500 }
     );
   }
+}
 
-  const newUser = {
-    id: mockUsers.length + 1,
-    name,
-    email,
-    role,
-  };
+// POST: create a new user in MongoDB
+export async function POST(req: Request) {
+  try {
+    console.log("POST /api/users called");
+    await connectDB();
 
-  mockUsers.push(newUser);
+    const data = await req.json();
+    console.log("POST body:", data);
 
-  return NextResponse.json(newUser, { status: 201 });
+    const { name, email, role, password } = data;
+
+    if (!name || !email || !password) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "User already exists" },
+        { status: 409 }
+      );
+    }
+
+    const user = await User.create({
+      name,
+      email,
+      role: role || "client",
+      password,
+    });
+
+    return NextResponse.json(
+      {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("POST /api/users error:", error);
+    return NextResponse.json(
+      { error: "Failed to create user" },
+      { status: 500 }
+    );
+  }
 }
